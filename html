@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#fafafa;--surface:#fff;--surface2:#f5f5f5;
+  --border:#e5e5e5;--border2:#ddd;
+  --text:#111;--text2:#555;--text3:#999;--text-inv:#fff;
+  --accent:#111;--accent-hover:#333;
+  --red:#e54;--orange:#f90;--green:#2a2;--blue:#37f;
+  --red-bg:#fef2f2;--orange-bg:#fff8f0;--green-bg:#f0fdf4;--blue-bg:#eff6ff;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 1px 3px rgba(0,0,0,.05);--shadow-md:0 4px 12px rgba(0,0,0,.08);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --transition:.2s ease;
+}
+.dark{
+  --bg:#0a0a0a;--surface:#161616;--surface2:#1e1e1e;
+  --border:#2a2a2a;--border2:#333;
+  --text:#eee;--text2:#aaa;--text3:#666;--text-inv:#111;
+  --accent:#fff;--accent-hover:#ccc;
+  --red-bg:#2a1515;--orange-bg:#2a2010;--green-bg:#152a15;--blue-bg:#151f2a;
+  --shadow:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 12px rgba(0,0,0,.4);
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh;transition:background var(--transition),color var(--transition)}
+button{font-family:var(--font);cursor:pointer}
+input,select,textarea{font-family:var(--font);color:var(--text)}
+
+/* LOADING */
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .3s}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{margin-top:16px;font-size:.85rem;color:var(--text2)}
+
+/* TOAST */
+.toast-container{position:fixed;top:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 20px;border-radius:var(--radius-sm);font-size:.8rem;box-shadow:var(--shadow-md);animation:slideIn .3s;max-width:320px}
+.toast-success{background:#065f46;color:#fff}
+.toast-error{background:#991b1b;color:#fff}
+.toast-info{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* LAYOUT */
+.app{max-width:1200px;margin:0 auto;padding:20px;display:none}
+.app.loaded{display:block}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.header-left h1{font-size:1.4rem;font-weight:700;letter-spacing:-.03em;display:flex;align-items:center;gap:8px}
+.header-left h1 em{font-weight:300;color:var(--text3);font-size:.9rem;font-style:normal}
+.header-left p{color:var(--text2);font-size:.8rem;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:8px}
+.icon-btn{width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all var(--transition);color:var(--text2)}
+.icon-btn:hover{background:var(--surface2);color:var(--text)}
+.sync-indicator{font-size:.7rem;color:var(--text3);display:flex;align-items:center;gap:4px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.sync-dot.syncing{background:var(--orange);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sheet-link{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text3);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);transition:all var(--transition)}
+.sheet-link:hover{color:var(--text);border-color:var(--border2)}
+
+/* STATS */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:all var(--transition)}
+.stat-card:hover{box-shadow:var(--shadow-md)}
+.stat-value{font-size:1.5rem;font-weight:700}
+.stat-label{font-size:.75rem;color:var(--text3);margin-top:2px}
+.stat-bar{height:3px;background:var(--surface2);border-radius:2px;margin-top:10px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:2px;transition:width .4s ease}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.search-box{flex:1;min-width:200px;display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;transition:border var(--transition)}
+.search-box:focus-within{border-color:#999}
+.search-box svg{flex-shrink:0;color:var(--text3)}
+.search-box input{flex:1;border:none;outline:none;padding:9px 8px;font-size:.85rem;background:transparent}
+.filters-row{display:flex;gap:4px;flex-wrap:wrap}
+.filter-btn{padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);font-size:.8rem;color:var(--text2);transition:all var(--transition);white-space:nowrap}
+.filter-btn:hover{border-color:#999}
+.filter-btn.active{background:var(--accent);color:var(--text-inv);border-color:var(--accent)}
+.view-toggle{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.view-btn{padding:7px 14px;border:none;background:var(--surface);font-size:.8rem;color:var(--text2);transition:all var(--transition)}
+.view-btn.active{background:var(--accent);color:var(--text-inv)}
+.view-btn:not(:last-child){border-right:1px solid var(--border)}
+
+/* ADD TASK */
+.add-task-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:24px;box-shadow:var(--shadow)}
+.add-task-row{display:flex;gap:8px;flex-wrap:wrap}
+.add-task-bar input[type="text"]{flex:1;min-width:200px;border:1px solid var(--border);outline:none;padding:9px 12px;border-radius:var(--radius-sm);font-size:.85rem;background:var(--surface2);transition:border var(--transition)}
+.add-task-bar input[type="text"]:focus{border-color:#999}
+.add-task-bar input[type="date"],.add-task-bar select{border:1px solid var(--border);outline:none;padding:9px 12px;border-radius:var(--radius-sm);font-size:.8rem;background:var(--surface2)}
+.btn-primary{padding:9px 20px;background:var(--accent);color:var(--text-inv);border:none;border-radius:var(--radius-sm);font-size:.85rem;font-weight:500;transition:opacity var(--transition)}
+.btn-primary:hover{opacity:.8}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-secondary{padding:9px 18px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;transition:all var(--transition)}
+.btn-secondary:hover{background:var(--border)}
+.btn-danger{padding:9px 18px;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:.85rem;transition:opacity var(--transition)}
+.btn-danger:hover{opacity:.8}
+.btn-sm{padding:5px 12px;font-size:.75rem;border-radius:4px}
+
+/* KANBAN */
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.kanban-col{background:var(--surface2);border-radius:var(--radius);padding:12px;min-height:300px;transition:all var(--transition)}
+.kanban-col-header{display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-bottom:8px;font-size:.8rem;font-weight:600}
+.kanban-col-count{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1px 8px;font-size:.7rem;color:var(--text2);font-weight:400}
+.kanban-col.drag-over{background:var(--blue-bg);outline:2px dashed var(--blue)}
+
+/* TASK CARD */
+.task-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;cursor:grab;transition:all var(--transition);position:relative}
+.task-card:hover{box-shadow:var(--shadow-md);border-color:var(--border2)}
+.task-card.dragging{opacity:.4;transform:rotate(2deg)}
+.task-card-top{display:flex;align-items:flex-start;gap:10px}
+.task-card-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all var(--transition);background:transparent}
+.task-card-check:hover{border-color:#999}
+.task-card.done .task-card-check{background:var(--accent);border-color:var(--accent)}
+.task-card.done .task-card-check::after{content:"\2713";color:var(--text-inv);font-size:.65rem;font-weight:700}
+.task-card.done .task-card-title{text-decoration:line-through;color:var(--text3)}
+.task-card-body{flex:1;min-width:0;cursor:pointer}
+.task-card-title{font-size:.85rem;font-weight:500;word-break:break-word}
+.task-card-desc{font-size:.75rem;color:var(--text2);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.task-card-meta{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+.badge{font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:500}
+.badge-cat{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.badge-high{background:var(--red-bg);color:var(--red)}
+.badge-medium{background:var(--orange-bg);color:var(--orange)}
+.badge-low{background:var(--green-bg);color:var(--green)}
+.badge-date{font-size:.7rem;color:var(--text3);display:flex;align-items:center;gap:3px}
+.badge-date.overdue{color:var(--red);font-weight:500}
+.badge-extra{font-size:.6rem;padding:2px 6px;border-radius:6px;background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.task-card-actions{position:absolute;top:8px;right:8px;display:flex;gap:2px;opacity:0;transition:opacity var(--transition)}
+.task-card:hover .task-card-actions{opacity:1}
+.task-card-actions button{background:var(--surface2);border:none;width:26px;height:26px;border-radius:4px;font-size:.7rem;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+.task-card-actions button:hover{background:var(--border);color:var(--text)}
+
+/* LIST VIEW */
+.list-view{display:flex;flex-direction:column;gap:4px}
+.list-view .task-card{cursor:default;margin-bottom:0}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3);font-size:.9rem}
+.empty-icon{font-size:2.5rem;margin-bottom:12px;opacity:.25}
+
+/* ===== MODAL (shared) ===== */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(2px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:12px;padding:28px;width:90%;max-width:480px;box-shadow:var(--shadow-md);max-height:90vh;overflow-y:auto}
+.modal h2{font-size:1.1rem;font-weight:600;margin-bottom:20px}
+.modal-field{margin-bottom:16px}
+.modal-field label{display:block;font-size:.8rem;color:var(--text2);margin-bottom:6px;font-weight:500}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:.85rem;background:var(--surface2);outline:none;transition:border var(--transition)}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:#999}
+.modal-field textarea{resize:vertical;min-height:80px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:24px}
+
+/* ===== DETAIL MODAL ===== */
+.detail-modal{background:var(--surface);border-radius:12px;width:92%;max-width:640px;box-shadow:var(--shadow-md);max-height:92vh;overflow-y:auto;display:flex;flex-direction:column}
+.detail-header{padding:24px 28px 16px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--border)}
+.detail-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all var(--transition);background:transparent}
+.detail-check:hover{border-color:#999}
+.detail-check.checked{background:var(--accent);border-color:var(--accent)}
+.detail-check.checked::after{content:"\2713";color:var(--text-inv);font-size:.75rem;font-weight:700}
+.detail-title-area{flex:1;min-width:0}
+.detail-title{font-size:1.1rem;font-weight:600;word-break:break-word;line-height:1.4}
+.detail-title.done-title{text-decoration:line-through;color:var(--text3)}
+.detail-created{font-size:.7rem;color:var(--text3);margin-top:4px}
+
+.detail-body{padding:20px 28px;flex:1;overflow-y:auto}
+.detail-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.detail-badge{font-size:.75rem;padding:4px 12px;border-radius:14px;font-weight:500;display:flex;align-items:center;gap:4px}
+.detail-badge-status{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.detail-badge-status.status-todo{border-color:var(--blue);color:var(--blue)}
+.detail-badge-status.status-doing{border-color:var(--orange);color:var(--orange)}
+.detail-badge-status.status-done{border-color:var(--green);color:var(--green)}
+
+.detail-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.detail-info-item{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px}
+.detail-info-label{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.detail-info-value{font-size:.85rem;font-weight:500}
+.detail-info-value.overdue-text{color:var(--red)}
+
+/* SECTIONS */
+.detail-section{margin-bottom:20px}
+.detail-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.detail-section-label{font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.detail-section-actions{display:flex;gap:4px}
+
+/* RICH TEXT EDITOR */
+.rte-toolbar{display:flex;gap:2px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius-sm) var(--radius-sm) 0 0;flex-wrap:wrap}
+.rte-btn{width:30px;height:28px;border:none;background:transparent;border-radius:4px;font-size:.8rem;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all .15s}
+.rte-btn:hover{background:var(--border);color:var(--text)}
+.rte-btn.active{background:var(--accent);color:var(--text-inv)}
+.rte-sep{width:1px;background:var(--border);margin:4px 4px}
+.rte-editor{min-height:120px;max-height:300px;overflow-y:auto;padding:12px;border:1px solid var(--border);border-radius:0 0 var(--radius-sm) var(--radius-sm);background:var(--surface);font-size:.85rem;line-height:1.6;outline:none}
+.rte-editor:focus{border-color:#999}
+.rte-editor h3{font-size:.95rem;margin:8px 0 4px}
+.rte-editor ul,.rte-editor ol{padding-left:20px;margin:4px 0}
+.rte-editor blockquote{border-left:3px solid var(--border);padding-left:12px;color:var(--text2);margin:8px 0}
+
+/* CHECKLIST */
+.checklist-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--surface2)}
+.checklist-item:last-child{border-bottom:none}
+.cl-check{width:16px;height:16px;border-radius:4px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:transparent}
+.cl-check:hover{border-color:#999}
+.cl-check.checked{background:var(--accent);border-color:var(--accent)}
+.cl-check.checked::after{content:"\2713";color:var(--text-inv);font-size:.6rem;font-weight:700}
+.cl-text{flex:1;font-size:.85rem;border:none;outline:none;background:transparent;color:var(--text);font-family:var(--font)}
+.cl-text.done{text-decoration:line-through;color:var(--text3)}
+.cl-del{width:20px;height:20px;border:none;background:transparent;color:var(--text3);font-size:.8rem;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;opacity:0;transition:all .15s}
+.checklist-item:hover .cl-del{opacity:1}
+.cl-del:hover{background:var(--red-bg);color:var(--red)}
+.cl-add{display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;color:var(--text3);font-size:.8rem;transition:color .15s}
+.cl-add:hover{color:var(--text)}
+.cl-progress{height:3px;background:var(--surface2);border-radius:2px;margin-top:8px;overflow:hidden}
+.cl-progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width .3s}
+
+/* TABLE BUILDER */
+.tbl-container{overflow-x:auto;margin-top:4px}
+.tbl-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl-table th,.tbl-table td{border:1px solid var(--border);padding:6px 10px;text-align:left;min-width:80px}
+.tbl-table th{background:var(--surface2);font-weight:600;font-size:.75rem;color:var(--text2)}
+.tbl-table td{background:var(--surface)}
+.tbl-cell-input{width:100%;border:none;outline:none;background:transparent;font-size:.8rem;font-family:var(--font);color:var(--text);padding:0}
+.tbl-actions{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+
+/* ATTACHMENTS */
+.att-list{display:flex;flex-direction:column;gap:6px}
+.att-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius-sm);transition:all .15s}
+.att-item:hover{background:var(--border)}
+.att-icon{font-size:1.2rem;flex-shrink:0}
+.att-info{flex:1;min-width:0}
+.att-name{font-size:.8rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.att-name a{color:var(--text);text-decoration:none}
+.att-name a:hover{text-decoration:underline}
+.att-meta{font-size:.65rem;color:var(--text3)}
+.att-del{width:24px;height:24px;border:none;background:transparent;color:var(--text3);font-size:.75rem;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;opacity:0;transition:all .15s}
+.att-item:hover .att-del{opacity:1}
+.att-del:hover{background:var(--red-bg);color:var(--red)}
+.att-add-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.att-add-row input[type="text"]{flex:1;min-width:150px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:.8rem;background:var(--surface2);outline:none}
+.att-upload-label{display:inline-flex;align-items:center;gap:4px;padding:7px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.8rem;color:var(--text2);cursor:pointer;transition:all .15s}
+.att-upload-label:hover{border-color:#999;color:var(--text)}
+.att-uploading{font-size:.75rem;color:var(--orange);padding:4px 0}
+
+.detail-footer{padding:16px 28px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .kanban{grid-template-columns:1fr}
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .header{flex-direction:column;align-items:flex-start}
+  .task-card-actions{opacity:1}
+  .toolbar{flex-direction:column}
+  .search-box{min-width:unset;width:100%}
+  .detail-modal{width:96%;max-width:none}
+  .detail-info-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){.app{padding:12px}.stats-bar{grid-template-columns:1fr 1fr}}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.task-card{animation:fadeIn .25s ease}
+.modal,.detail-modal{animation:slideUp .2s ease}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Đang tải dữ liệu từ Google Sheets...</div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="app" id="app">
+  <div class="header">
+    <div class="header-left">
+      <h1>TaskFlow <em>Pro</em></h1>
+      <p id="dateDisplay"></p>
+    </div>
+    <div class="header-right">
+      <div class="sync-indicator"><span class="sync-dot" id="syncDot"></span><span id="syncText">Đã đồng bộ</span></div>
+      <a class="sheet-link" id="sheetLink" href="#" target="_blank" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Xem Sheet
+      </a>
+      <button class="icon-btn" onclick="refreshData()" title="Làm mới">&#8635;</button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Giao diện">&#9681;</button>
+    </div>
+  </div>
+  <div class="stats-bar" id="statsBar"></div>
+  <div class="toolbar">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Tìm kiếm... (nhấn /)" oninput="renderUI()">
+    </div>
+    <div class="filters-row" id="categoryFilters"></div>
+    <div class="filters-row" id="priorityFilters"></div>
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="kanban" onclick="setView('kanban')">Kanban</button>
+      <button class="view-btn" data-view="list" onclick="setView('list')">Danh sách</button>
+    </div>
+  </div>
+  <div class="add-task-bar">
+    <div class="add-task-row">
+      <input type="text" id="newTitle" placeholder="Tên công việc mới...">
+      <select id="newCategory"></select>
+      <select id="newPriority"><option value="low">Thấp</option><option value="medium" selected>Trung bình</option><option value="high">Cao</option></select>
+      <input type="date" id="newDeadline">
+      <button class="btn-primary" id="addBtn" onclick="handleAddTask()">+ Thêm</button>
+    </div>
+  </div>
+  <div id="mainContent"></div>
+</div>
+
+<!-- ===== DETAIL MODAL ===== -->
+<div class="modal-overlay" id="detailModal">
+  <div class="detail-modal">
+    <div class="detail-header">
+      <div class="detail-check" id="detailCheck" onclick="toggleDoneFromDetail()"></div>
+      <div class="detail-title-area">
+        <div class="detail-title" id="detailTitle"></div>
+        <div class="detail-created" id="detailCreated"></div>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-badges" id="detailBadges"></div>
+      <div class="detail-info-grid" id="detailInfoGrid"></div>
+
+      <!-- GHI CHÚ RICH TEXT -->
+      <div class="detail-section" id="notesSection">
+        <div class="detail-section-header">
+          <span class="detail-section-label">Ghi chú</span>
+        </div>
+        <div class="rte-toolbar" id="rteToolbar">
+          <button class="rte-btn" onclick="rteCmd('bold')" title="Bold"><b>B</b></button>
+          <button class="rte-btn" onclick="rteCmd('italic')" title="Italic"><i>I</i></button>
+          <button class="rte-btn" onclick="rteCmd('underline')" title="Underline"><u>U</u></button>
+          <button class="rte-btn" onclick="rteCmd('strikeThrough')" title="Gạch ngang"><s>S</s></button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="rteCmd('formatBlock','<h3>')" title="Tiêu đề">H</button>
+          <button class="rte-btn" onclick="rteCmd('insertUnorderedList')" title="Danh sách">&#8226;</button>
+          <button class="rte-btn" onclick="rteCmd('insertOrderedList')" title="Đánh số">1.</button>
+          <button class="rte-btn" onclick="rteCmd('formatBlock','<blockquote>')" title="Trích dẫn">&#8220;</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn" onclick="rteCmd('removeFormat')" title="Xóa định dạng">&#10005;</button>
+        </div>
+        <div class="rte-editor" id="rteEditor" contenteditable="true"></div>
+      </div>
+
+      <!-- CHECKLIST -->
+      <div class="detail-section" id="checklistSection">
+        <div class="detail-section-header">
+          <span class="detail-section-label">Checklist</span>
+        </div>
+        <div id="checklistContainer"></div>
+        <div class="cl-progress"><div class="cl-progress-fill" id="clProgress"></div></div>
+      </div>
+
+      <!-- BẢNG DỮ LIỆU -->
+      <div class="detail-section" id="tableSection">
+        <div class="detail-section-header">
+          <span class="detail-section-label">Bảng dữ liệu</span>
+          <div class="detail-section-actions">
+            <button class="btn-secondary btn-sm" onclick="addTable()">+ Bảng mới</button>
+          </div>
+        </div>
+        <div id="tablesContainer"></div>
+      </div>
+
+      <!-- ĐÍNH KÈM -->
+      <div class="detail-section" id="attachSection">
+        <div class="detail-section-header">
+          <span class="detail-section-label">Đính kèm</span>
+        </div>
+        <div class="att-list" id="attList"></div>
+        <div class="att-add-row">
+          <input type="text" id="attLinkInput" placeholder="Dán link URL...">
+          <button class="btn-secondary btn-sm" onclick="addLinkAttachment()">+ Link</button>
+          <label class="att-upload-label">
+            &#128206; Upload
+            <input type="file" id="attFileInput" style="display:none" onchange="handleFileUpload(event)">
+          </label>
+        </div>
+        <div class="att-uploading" id="attUploading" style="display:none">Đang upload file...</div>
+      </div>
+    </div>
+    <div class="detail-footer">
+      <button class="btn-danger" onclick="deleteFromDetail()">Xóa</button>
+      <button class="btn-secondary" onclick="closeDetailModal()">Đóng</button>
+      <button class="btn-primary" onclick="saveDetailAndClose()">Lưu thay đổi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDIT MODAL (quick edit) ===== -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2>Chỉnh sửa nhanh</h2>
+    <input type="hidden" id="editId">
+    <div class="modal-field"><label>Tên</label><input type="text" id="editTitle"></div>
+    <div class="modal-field"><label>Mô tả ngắn</label><textarea id="editDesc" rows="2"></textarea></div>
+    <div class="modal-field"><label>Danh mục</label><select id="editCategory"></select></div>
+    <div class="modal-field"><label>Ưu tiên</label><select id="editPriority"><option value="low">Thấp</option><option value="medium">TB</option><option value="high">Cao</option></select></div>
+    <div class="modal-field"><label>Trạng thái</label><select id="editStatus"><option value="todo">Cần làm</option><option value="doing">Đang làm</option><option value="done">Hoàn thành</option></select></div>
+    <div class="modal-field"><label>Deadline</label><input type="date" id="editDeadline"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Hủy</button>
+      <button class="btn-primary" onclick="handleSaveEdit()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================
+// STATE
+// ============================================
+var tasks=[], categories=[], currentView='kanban', activeCategory='all', activePriority='all', darkMode=false, sheetUrl='';
+var detailTaskId=null; // ID of task open in detail modal
+
+(function(){
+  var el=document.getElementById('dateDisplay');
+  el.textContent=new Date().toLocaleDateString('vi-VN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+})();
+
+// ============================================
+// TOAST / SYNC
+// ============================================
+function showToast(m,t){t=t||'info';var c=document.getElementById('toastContainer'),d=document.createElement('div');d.className='toast toast-'+t;d.textContent=m;c.appendChild(d);setTimeout(function(){d.style.opacity='0';setTimeout(function(){d.remove()},300)},3000)}
+function setSyncing(v){var d=document.getElementById('syncDot'),t=document.getElementById('syncText');if(v){d.classList.add('syncing');t.textContent='Đang đồng bộ...'}else{d.classList.remove('syncing');t.textContent='Đã đồng bộ'}}
+
+// ============================================
+// LOAD DATA
+// ============================================
+function loadData(){
+  google.script.run.withSuccessHandler(function(data){
+    tasks=data.tasks||[];categories=data.settings.categories||[];darkMode=data.settings.darkMode||false;
+    if(darkMode)document.body.classList.add('dark');
+    google.script.run.withSuccessHandler(function(url){sheetUrl=url;var l=document.getElementById('sheetLink');l.href=url;l.style.display='inline-flex'}).getSheetUrl();
+    renderFilters();renderUI();
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    document.getElementById('app').classList.add('loaded');
+  }).withFailureHandler(function(e){
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    document.getElementById('app').classList.add('loaded');
+    showToast('Lỗi: '+e.message,'error');
+  }).getAllData();
+}
+function refreshData(){setSyncing(true);google.script.run.withSuccessHandler(function(data){tasks=data.tasks||[];categories=data.settings.categories||[];renderFilters();renderUI();setSyncing(false);showToast('Đã làm mới','success')}).withFailureHandler(function(e){setSyncing(false);showToast('Lỗi: '+e.message,'error')}).getAllData()}
+function toggleTheme(){darkMode=!darkMode;document.body.classList.toggle('dark',darkMode);google.script.run.saveSettings({categories:categories,darkMode:darkMode})}
+function setView(v){currentView=v;document.querySelectorAll('.view-btn').forEach(function(b){b.classList.toggle('active',b.dataset.view===v)});renderUI()}
+
+// ============================================
+// FILTERS
+// ============================================
+function renderFilters(){
+  var sel=document.getElementById('newCategory');
+  sel.innerHTML=categories.map(function(c){return'<option value="'+ea(c)+'">'+eh(c)+'</option>'}).join('');
+  var cf=document.getElementById('categoryFilters');
+  var h='<button class="filter-btn'+(activeCategory==='all'?' active':'')+'" onclick="setFilter(\'cat\',\'all\')">Tất cả</button>';
+  for(var i=0;i<categories.length;i++){var c=categories[i];h+='<button class="filter-btn'+(activeCategory===c?' active':'')+'" onclick="setFilter(\'cat\',\''+ea(c)+'\')">'+eh(c)+'</button>'}
+  h+='<button class="filter-btn" onclick="addCategory()">+</button>';cf.innerHTML=h;
+  var pf=document.getElementById('priorityFilters'),pi=[['all','Mọi mức'],['high','Cao'],['medium','TB'],['low','Thấp']],ph='';
+  for(var j=0;j<pi.length;j++)ph+='<button class="filter-btn'+(activePriority===pi[j][0]?' active':'')+'" onclick="setFilter(\'pri\',\''+pi[j][0]+'\')">'+pi[j][1]+'</button>';
+  pf.innerHTML=ph;
+}
+function setFilter(t,v){if(t==='cat')activeCategory=v;else activePriority=v;renderFilters();renderUI()}
+function addCategory(){var n=prompt('Tên danh mục mới:');if(n&&n.trim()&&categories.indexOf(n.trim())===-1){categories.push(n.trim());setSyncing(true);google.script.run.withSuccessHandler(function(){setSyncing(false);showToast('Đã thêm danh mục','success')}).withFailureHandler(function(e){setSyncing(false);showToast('Lỗi','error')}).saveSettings({categories:categories,darkMode:darkMode});renderFilters()}}
+
+// ============================================
+// ADD TASK
+// ============================================
+function handleAddTask(){
+  var el=document.getElementById('newTitle'),t=el.value.trim();if(!t){el.focus();return}
+  var td={title:t,description:'',category:document.getElementById('newCategory').value,priority:document.getElementById('newPriority').value,status:'todo',deadline:document.getElementById('newDeadline').value||null,checklist:[],notes:'',tables:[],attachments:[]};
+  var btn=document.getElementById('addBtn');btn.disabled=true;btn.textContent='...';setSyncing(true);
+  google.script.run.withSuccessHandler(function(nt){tasks.unshift(nt);renderUI();el.value='';document.getElementById('newDeadline').value='';btn.disabled=false;btn.textContent='+ Thêm';setSyncing(false);showToast('Đã thêm: '+nt.title,'success')}).withFailureHandler(function(e){btn.disabled=false;btn.textContent='+ Thêm';setSyncing(false);showToast('Lỗi','error')}).addTask(td);
+}
+document.getElementById('newTitle').addEventListener('keydown',function(e){if(e.key==='Enter')handleAddTask()});
+
+// ============================================
+// TOGGLE DONE
+// ============================================
+function toggleDone(id){var t=findTask(id);if(!t)return;t.status=(t.status==='done')?'todo':'done';renderUI();syncTask(t)}
+function syncTask(t){setSyncing(true);google.script.run.withSuccessHandler(function(){setSyncing(false)}).withFailureHandler(function(){setSyncing(false);showToast('Lỗi đồng bộ','error')}).updateTask(t)}
+
+// ============================================
+// DETAIL MODAL
+// ============================================
+function openDetail(id){
+  var t=findTask(id);if(!t)return;detailTaskId=id;
+  // Header
+  var titleEl=document.getElementById('detailTitle');titleEl.textContent=t.title;titleEl.className='detail-title'+(t.status==='done'?' done-title':'');
+  var checkEl=document.getElementById('detailCheck');checkEl.className='detail-check'+(t.status==='done'?' checked':'');
+  var crEl=document.getElementById('detailCreated');
+  if(t.createdAt){var d=new Date(t.createdAt);crEl.textContent='Tạo lúc '+d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}else crEl.textContent='';
+  // Badges
+  var sL={todo:'Cần làm',doing:'Đang làm',done:'Hoàn thành'},pL={high:'Ưu tiên cao',medium:'Ưu tiên TB',low:'Ưu tiên thấp'};
+  var pc=t.priority==='high'?'badge-high':(t.priority==='medium'?'badge-medium':'badge-low');
+  document.getElementById('detailBadges').innerHTML='<span class="detail-badge detail-badge-status status-'+t.status+'">'+sL[t.status]+'</span><span class="detail-badge '+pc+'">'+pL[t.priority]+'</span><span class="detail-badge badge-cat">'+eh(t.category)+'</span>';
+  // Info
+  var ov=isOverdue(t.deadline)&&t.status!=='done';
+  var ih='<div class="detail-info-item"><div class="detail-info-label">Danh mục</div><div class="detail-info-value">'+eh(t.category)+'</div></div>';
+  ih+='<div class="detail-info-item"><div class="detail-info-label">Deadline</div><div class="detail-info-value'+(ov?' overdue-text':'')+'">';
+  if(t.deadline){ih+=new Date(t.deadline).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});if(ov)ih+=' (quá hạn)'}else ih+='Chưa đặt';
+  ih+='</div></div>';document.getElementById('detailInfoGrid').innerHTML=ih;
+  // Notes (rich text)
+  document.getElementById('rteEditor').innerHTML=t.notes||'<p style="color:var(--text3)"><em>Nhấn vào đây để thêm ghi chú...</em></p>';
+  // Checklist
+  renderChecklist(t.checklist||[]);
+  // Tables
+  renderTables(t.tables||[]);
+  // Attachments
+  renderAttachments(t.attachments||[]);
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function closeDetailModal(){document.getElementById('detailModal').classList.remove('open');detailTaskId=null}
+
+function toggleDoneFromDetail(){if(!detailTaskId)return;toggleDone(detailTaskId);openDetail(detailTaskId)}
+
+function editFromDetail(){if(!detailTaskId)return;closeDetailModal();openEdit(detailTaskId)}
+
+function deleteFromDetail(){
+  if(!detailTaskId||!confirm('Xóa công việc này?'))return;
+  var id=detailTaskId;tasks=tasks.filter(function(t){return String(t.id)!==String(id)});
+  closeDetailModal();renderUI();setSyncing(true);
+  google.script.run.withSuccessHandler(function(){setSyncing(false);showToast('Đã xóa','success')}).withFailureHandler(function(){setSyncing(false);showToast('Lỗi','error')}).deleteTask(id);
+}
+
+function saveDetailAndClose(){
+  if(!detailTaskId)return;var t=findTask(detailTaskId);if(!t)return;
+  // Collect notes
+  t.notes=document.getElementById('rteEditor').innerHTML;
+  // Collect checklist
+  t.checklist=collectChecklist();
+  // Collect tables
+  t.tables=collectTables();
+  // Attachments already updated in state
+  closeDetailModal();renderUI();setSyncing(true);
+  google.script.run.withSuccessHandler(function(){setSyncing(false);showToast('Đã lưu','success')}).withFailureHandler(function(e){setSyncing(false);showToast('Lỗi: '+e.message,'error')}).updateTask(t);
+}
+
+document.getElementById('detailModal').addEventListener('click',function(e){if(e.target===document.getElementById('detailModal')){saveDetailAndClose()}});
+
+// ============================================
+// RICH TEXT EDITOR
+// ============================================
+function rteCmd(cmd,val){document.execCommand(cmd,false,val||null);document.getElementById('rteEditor').focus()}
+
+// ============================================
+// CHECKLIST
+// ============================================
+function renderChecklist(items){
+  var c=document.getElementById('checklistContainer'),h='';
+  for(var i=0;i<items.length;i++){
+    h+='<div class="checklist-item" data-idx="'+i+'">';
+    h+='<div class="cl-check'+(items[i].done?' checked':'')+'" onclick="toggleClItem('+i+')"></div>';
+    h+='<input class="cl-text'+(items[i].done?' done':'')+'" value="'+ea(items[i].text)+'" onchange="updateClText('+i+',this.value)">';
+    h+='<button class="cl-del" onclick="removeClItem('+i+')">&times;</button></div>';
+  }
+  h+='<div class="cl-add" onclick="addClItem()">+ Thêm mục</div>';
+  c.innerHTML=h;
+  updateClProgress(items);
+}
+function addClItem(){
+  var t=findTask(detailTaskId);if(!t)return;
+  if(!t.checklist)t.checklist=[];
+  t.checklist.push({text:'',done:false});
+  renderChecklist(t.checklist);
+  // Focus last input
+  var inputs=document.querySelectorAll('#checklistContainer .cl-text');
+  if(inputs.length)inputs[inputs.length-1].focus();
+}
+function toggleClItem(i){var t=findTask(detailTaskId);if(!t||!t.checklist[i])return;t.checklist[i].done=!t.checklist[i].done;renderChecklist(t.checklist)}
+function updateClText(i,v){var t=findTask(detailTaskId);if(!t||!t.checklist[i])return;t.checklist[i].text=v}
+function removeClItem(i){var t=findTask(detailTaskId);if(!t)return;t.checklist.splice(i,1);renderChecklist(t.checklist)}
+function collectChecklist(){
+  var items=[];
+  document.querySelectorAll('#checklistContainer .checklist-item').forEach(function(el){
+    var idx=parseInt(el.dataset.idx);
+    var text=el.querySelector('.cl-text').value;
+    var done=el.querySelector('.cl-check').classList.contains('checked');
+    items.push({text:text,done:done});
+  });
+  return items;
+}
+function updateClProgress(items){
+  var total=items.length,done=items.filter(function(i){return i.done}).length;
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('clProgress').style.width=pct+'%';
+}
+
+// ============================================
+// TABLE BUILDER
+// ============================================
+function renderTables(tables){
+  var c=document.getElementById('tablesContainer'),h='';
+  for(var ti=0;ti<tables.length;ti++){
+    var tbl=tables[ti];
+    h+='<div class="tbl-container" data-tidx="'+ti+'" style="margin-bottom:16px">';
+    h+='<table class="tbl-table"><thead><tr>';
+    for(var ci=0;ci<tbl.headers.length;ci++){
+      h+='<th><input class="tbl-cell-input" value="'+ea(tbl.headers[ci])+'" onchange="updateTblHeader('+ti+','+ci+',this.value)" style="font-weight:600"></th>';
+    }
+    h+='</tr></thead><tbody>';
+    for(var ri=0;ri<tbl.rows.length;ri++){
+      h+='<tr>';
+      for(var rci=0;rci<tbl.rows[ri].length;rci++){
+        h+='<td><input class="tbl-cell-input" value="'+ea(tbl.rows[ri][rci])+'" onchange="updateTblCell('+ti+','+ri+','+rci+',this.value)"></td>';
+      }
+      h+='</tr>';
+    }
+    h+='</tbody></table>';
+    h+='<div class="tbl-actions">';
+    h+='<button class="btn-secondary btn-sm" onclick="addTblRow('+ti+')">+ Hàng</button>';
+    h+='<button class="btn-secondary btn-sm" onclick="addTblCol('+ti+')">+ Cột</button>';
+    h+='<button class="btn-secondary btn-sm" onclick="removeTblLastRow('+ti+')">- Hàng</button>';
+    h+='<button class="btn-secondary btn-sm" onclick="removeTblLastCol('+ti+')">- Cột</button>';
+    h+='<button class="btn-danger btn-sm" onclick="removeTable('+ti+')">Xóa bảng</button>';
+    h+='</div></div>';
+  }
+  c.innerHTML=h;
+}
+function addTable(){
+  var t=findTask(detailTaskId);if(!t)return;
+  if(!t.tables)t.tables=[];
+  t.tables.push({headers:['Cột 1','Cột 2','Cột 3'],rows:[['','','']]});
+  renderTables(t.tables);
+}
+function addTblRow(ti){var t=findTask(detailTaskId);if(!t||!t.tables[ti])return;var cols=t.tables[ti].headers.length;t.tables[ti].rows.push(new Array(cols).fill(''));renderTables(t.tables)}
+function addTblCol(ti){var t=findTask(detailTaskId);if(!t||!t.tables[ti])return;t.tables[ti].headers.push('Cột '+(t.tables[ti].headers.length+1));for(var i=0;i<t.tables[ti].rows.length;i++)t.tables[ti].rows[i].push('');renderTables(t.tables)}
+function removeTblLastRow(ti){var t=findTask(detailTaskId);if(!t||!t.tables[ti]||t.tables[ti].rows.length<=1)return;t.tables[ti].rows.pop();renderTables(t.tables)}
+function removeTblLastCol(ti){var t=findTask(detailTaskId);if(!t||!t.tables[ti]||t.tables[ti].headers.length<=1)return;t.tables[ti].headers.pop();for(var i=0;i<t.tables[ti].rows.length;i++)t.tables[ti].rows[i].pop();renderTables(t.tables)}
+function removeTable(ti){var t=findTask(detailTaskId);if(!t)return;t.tables.splice(ti,1);renderTables(t.tables)}
+function updateTblHeader(ti,ci,v){var t=findTask(detailTaskId);if(t&&t.tables[ti])t.tables[ti].headers[ci]=v}
+function updateTblCell(ti,ri,ci,v){var t=findTask(detailTaskId);if(t&&t.tables[ti]&&t.tables[ti].rows[ri])t.tables[ti].rows[ri][ci]=v}
+function collectTables(){
+  var t=findTask(detailTaskId);
+  return t?t.tables||[]:[];
+}
+
+// ============================================
+// ATTACHMENTS
+// ============================================
+function renderAttachments(items){
+  var c=document.getElementById('attList'),h='';
+  for(var i=0;i<items.length;i++){
+    var a=items[i];
+    var icon=a.type==='file'?'&#128196;':'&#128279;';
+    h+='<div class="att-item"><div class="att-icon">'+icon+'</div>';
+    h+='<div class="att-info"><div class="att-name"><a href="'+ea(a.url)+'" target="_blank">'+eh(a.name||a.url)+'</a></div>';
+    h+='<div class="att-meta">'+eh(a.type==='file'?'File upload':'Link')+'</div></div>';
+    h+='<button class="att-del" onclick="removeAttachment('+i+')">&times;</button></div>';
+  }
+  c.innerHTML=h;
+}
+function addLinkAttachment(){
+  var inp=document.getElementById('attLinkInput'),url=inp.value.trim();
+  if(!url)return;
+  var t=findTask(detailTaskId);if(!t)return;
+  if(!t.attachments)t.attachments=[];
+  // Extract name from URL
+  var name=url;try{name=new URL(url).hostname+'/...'}catch(e){}
+  t.attachments.push({type:'link',name:name,url:url});
+  inp.value='';
+  renderAttachments(t.attachments);
+}
+function handleFileUpload(e){
+  var file=e.target.files[0];if(!file)return;
+  var t=findTask(detailTaskId);if(!t)return;
+  document.getElementById('attUploading').style.display='block';
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var base64=ev.target.result.split(',')[1];
+    google.script.run
+      .withSuccessHandler(function(result){
+        document.getElementById('attUploading').style.display='none';
+        if(!t.attachments)t.attachments=[];
+        t.attachments.push({type:'file',name:result.name,url:result.url,mimeType:result.mimeType});
+        renderAttachments(t.attachments);
+        showToast('Đã upload: '+result.name,'success');
+      })
+      .withFailureHandler(function(err){
+        document.getElementById('attUploading').style.display='none';
+        showToast('Lỗi upload: '+err.message,'error');
+      })
+      .uploadFile(base64,file.name,file.type);
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+function removeAttachment(i){
+  var t=findTask(detailTaskId);if(!t||!t.attachments)return;
+  t.attachments.splice(i,1);renderAttachments(t.attachments);
+}
+
+// ============================================
+// EDIT MODAL (quick)
+// ============================================
+function openEdit(id){
+  var t=findTask(id);if(!t)return;
+  document.getElementById('editId').value=t.id;
+  document.getElementById('editTitle').value=t.title;
+  document.getElementById('editDesc').value=t.description||'';
+  document.getElementById('editCategory').innerHTML=categories.map(function(c){return'<option value="'+ea(c)+'"'+(c===t.category?' selected':'')+'>'+eh(c)+'</option>'}).join('');
+  document.getElementById('editPriority').value=t.priority;
+  document.getElementById('editStatus').value=t.status;
+  document.getElementById('editDeadline').value=t.deadline||'';
+  document.getElementById('editModal').classList.add('open');
+}
+function closeModal(){document.getElementById('editModal').classList.remove('open')}
+function handleSaveEdit(){
+  var id=document.getElementById('editId').value,t=findTask(id);if(!t)return;
+  t.title=document.getElementById('editTitle').value.trim()||t.title;
+  t.description=document.getElementById('editDesc').value.trim();
+  t.category=document.getElementById('editCategory').value;
+  t.priority=document.getElementById('editPriority').value;
+  t.status=document.getElementById('editStatus').value;
+  t.deadline=document.getElementById('editDeadline').value||null;
+  closeModal();renderUI();syncTask(t);showToast('Đã cập nhật','success');
+}
+document.getElementById('editModal').addEventListener('click',function(e){if(e.target===document.getElementById('editModal'))closeModal()});
+
+// ============================================
+// DRAG & DROP
+// ============================================
+var draggedId=null;
+function onDragStart(e,id){draggedId=id;e.dataTransfer.effectAllowed='move';setTimeout(function(){e.target.classList.add('dragging')},0)}
+function onDragEnd(e){e.target.classList.remove('dragging');document.querySelectorAll('.kanban-col').forEach(function(c){c.classList.remove('drag-over')});draggedId=null}
+function onDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over')}
+function onDragLeave(e){e.currentTarget.classList.remove('drag-over')}
+function onDrop(e,s){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(draggedId===null)return;var t=findTask(draggedId);if(t&&t.status!==s){t.status=s;renderUI();syncTask(t)}}
+
+// ============================================
+// HELPERS
+// ============================================
+function findTask(id){for(var i=0;i<tasks.length;i++)if(String(tasks[i].id)===String(id))return tasks[i];return null}
+function eh(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function ea(s){return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function isOverdue(dl){if(!dl)return false;var d=new Date(dl),t=new Date();t.setHours(0,0,0,0);return d<t}
+function formatDate(d){if(!d)return'';return new Date(d).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'})}
+function getFiltered(){
+  var s=document.getElementById('searchInput').value.toLowerCase();
+  return tasks.filter(function(t){
+    if(activeCategory!=='all'&&t.category!==activeCategory)return false;
+    if(activePriority!=='all'&&t.priority!==activePriority)return false;
+    if(s){if(t.title.toLowerCase().indexOf(s)===-1&&(t.description||'').toLowerCase().indexOf(s)===-1)return false}
+    return true;
+  });
+}
+
+// ============================================
+// RENDER TASK CARD
+// ============================================
+function taskCardHTML(t){
+  var pc=t.priority==='high'?'badge-high':(t.priority==='medium'?'badge-medium':'badge-low');
+  var pl=t.priority==='high'?'Cao':(t.priority==='medium'?'TB':'Thấp');
+  var ov=isOverdue(t.deadline)&&t.status!=='done';
+  var clCount=(t.checklist||[]).length,clDone=(t.checklist||[]).filter(function(i){return i.done}).length;
+  var attCount=(t.attachments||[]).length;
+  var tblCount=(t.tables||[]).length;
+
+  var h='<div class="task-card'+(t.status==='done'?' done':'')+'" draggable="true" ondragstart="onDragStart(event,\''+t.id+'\')" ondragend="onDragEnd(event)">';
+  h+='<div class="task-card-actions">';
+  h+='<button onclick="event.stopPropagation();openDetail(\''+t.id+'\')" title="Chi tiết">&#9776;</button>';
+  h+='<button onclick="event.stopPropagation();openEdit(\''+t.id+'\')" title="Sửa nhanh">&#9998;</button>';
+  h+='</div>';
+  h+='<div class="task-card-top">';
+  h+='<div class="task-card-check" onclick="event.stopPropagation();toggleDone(\''+t.id+'\')"></div>';
+  h+='<div class="task-card-body" onclick="openDetail(\''+t.id+'\')">';
+  h+='<div class="task-card-title">'+eh(t.title)+'</div>';
+  if(t.description)h+='<div class="task-card-desc">'+eh(t.description)+'</div>';
+  h+='<div class="task-card-meta">';
+  h+='<span class="badge badge-cat">'+eh(t.category)+'</span>';
+  h+='<span class="badge '+pc+'">'+pl+'</span>';
+  if(t.deadline)h+='<span class="badge-date'+(ov?' overdue':'')+'">&#128197; '+formatDate(t.deadline)+(ov?' (quá hạn)':'')+'</span>';
+  if(clCount>0)h+='<span class="badge-extra">&#9745; '+clDone+'/'+clCount+'</span>';
+  if(attCount>0)h+='<span class="badge-extra">&#128206; '+attCount+'</span>';
+  if(tblCount>0)h+='<span class="badge-extra">&#9638; '+tblCount+'</span>';
+  h+='</div></div></div></div>';
+  return h;
+}
+
+// ============================================
+// RENDER STATS / KANBAN / LIST / UI
+// ============================================
+function renderStats(){
+  var total=tasks.length,done=0,doing=0,overdue=0;
+  for(var i=0;i<tasks.length;i++){if(tasks[i].status==='done')done++;if(tasks[i].status==='doing')doing++;if(isOverdue(tasks[i].deadline)&&tasks[i].status!=='done')overdue++}
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('statsBar').innerHTML=
+    '<div class="stat-card"><div class="stat-value">'+total+'</div><div class="stat-label">Tổng</div><div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--accent)"></div></div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+doing+'</div><div class="stat-label">Đang làm</div><div class="stat-bar"><div class="stat-bar-fill" style="width:'+(total?doing/total*100:0)+'%;background:var(--blue)"></div></div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+pct+'%</div><div class="stat-label">Hoàn thành</div><div class="stat-bar"><div class="stat-bar-fill" style="width:'+pct+'%;background:var(--green)"></div></div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+overdue+'</div><div class="stat-label">Quá hạn</div><div class="stat-bar"><div class="stat-bar-fill" style="width:'+(total?overdue/total*100:0)+'%;background:var(--red)"></div></div></div>';
+}
+function renderKanban(f){
+  var cols=[{key:'todo',label:'Cần làm',items:[]},{key:'doing',label:'Đang làm',items:[]},{key:'done',label:'Hoàn thành',items:[]}];
+  for(var i=0;i<f.length;i++){for(var j=0;j<cols.length;j++)if(f[i].status===cols[j].key){cols[j].items.push(f[i]);break}}
+  var h='<div class="kanban">';
+  for(var k=0;k<cols.length;k++){var c=cols[k];h+='<div class="kanban-col" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,\''+c.key+'\')">';h+='<div class="kanban-col-header">'+c.label+'<span class="kanban-col-count">'+c.items.length+'</span></div>';for(var m=0;m<c.items.length;m++)h+=taskCardHTML(c.items[m]);h+='</div>'}
+  return h+'</div>';
+}
+function renderList(f){
+  if(!f.length)return'<div class="empty-state"><div class="empty-icon">&#9675;</div>Không có công việc</div>';
+  var so={todo:0,doing:1,done:2},po={high:0,medium:1,low:2};
+  var s=f.slice().sort(function(a,b){var d=(so[a.status]||0)-(so[b.status]||0);return d!==0?d:(po[a.priority]||0)-(po[b.priority]||0)});
+  var h='<div class="list-view">';for(var i=0;i<s.length;i++)h+=taskCardHTML(s[i]);return h+'</div>';
+}
+function renderUI(){var f=getFiltered();document.getElementById('mainContent').innerHTML=(currentView==='kanban')?renderKanban(f):renderList(f);renderStats()}
+
+// ============================================
+// KEYBOARD
+// ============================================
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){closeDetailModal();closeModal()}
+  if(e.key==='/'&&!e.ctrlKey&&!e.metaKey){var tag=document.activeElement.tagName;if(tag!=='INPUT'&&tag!=='TEXTAREA'&&tag!=='SELECT'&&!document.activeElement.isContentEditable){e.preventDefault();document.getElementById('searchInput').focus()}}
+});
+
+// ============================================
+// START
+// ============================================
+loadData();
+</script>
+</body>
+</html>
