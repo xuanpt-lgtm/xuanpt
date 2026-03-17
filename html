@@ -120,7 +120,7 @@ input,select,textarea{font-family:var(--font);color:var(--text)}
 .task-card.done .task-card-title{text-decoration:line-through;color:var(--text3)}
 .task-card-body{flex:1;min-width:0;cursor:pointer}
 .task-card-title{font-size:.85rem;font-weight:500;word-break:break-word}
-.task-card-desc{font-size:.75rem;color:var(--text2);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.task-card-desc{font-size:.75rem;color:var(--text2);margin-top:4px;display:-webkit-box; line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .task-card-meta{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
 .badge{font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:500}
 .badge-cat{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
@@ -244,6 +244,76 @@ input,select,textarea{font-family:var(--font);color:var(--text)}
 
 .detail-footer{padding:16px 28px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
 
+/* ===== DASHBOARD ===== */
+.dashboard{display:flex;flex-direction:column;gap:20px}
+.dash-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dash-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all var(--transition)}
+.dash-card:hover{box-shadow:var(--shadow-md)}
+.dash-card-title{font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.dash-card-title span{font-size:1rem}
+
+/* Donut Chart */
+.donut-wrap{display:flex;align-items:center;gap:24px}
+.donut-svg{flex-shrink:0}
+.donut-legend{display:flex;flex-direction:column;gap:8px}
+.donut-legend-item{display:flex;align-items:center;gap:8px;font-size:.8rem}
+.donut-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.donut-legend-val{font-weight:600;margin-left:auto;min-width:24px;text-align:right}
+
+/* Bar Chart */
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:140px;padding-top:10px}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}
+.bar-fill{width:100%;max-width:48px;border-radius:4px 4px 0 0;transition:height .4s ease;min-height:2px;position:relative}
+.bar-fill:hover{opacity:.85}
+.bar-val{font-size:.65rem;font-weight:600;text-align:center;margin-bottom:4px;color:var(--text2)}
+.bar-label{font-size:.65rem;color:var(--text3);margin-top:6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px}
+
+/* Line Chart */
+.line-chart-wrap{position:relative;height:160px}
+.line-chart-svg{width:100%;height:100%}
+.line-chart-label{font-size:.6rem;fill:var(--text3)}
+.line-chart-grid{stroke:var(--border);stroke-width:.5}
+.line-chart-path{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.line-chart-area{opacity:.1}
+.line-chart-dot{r:3;transition:r .15s}
+.line-chart-dot:hover{r:5}
+
+/* Summary Tables */
+.dash-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.dash-table th{text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.03em}
+.dash-table td{padding:8px 10px;border-bottom:1px solid var(--surface2)}
+.dash-table tr:hover td{background:var(--surface2)}
+.dash-table .td-title{font-weight:500;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.dash-table .td-title:hover{color:var(--blue);text-decoration:underline}
+.dash-table .td-badge{display:inline-block;font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:500}
+.dash-table .td-overdue{color:var(--red);font-weight:500}
+.dash-empty{text-align:center;padding:24px;color:var(--text3);font-size:.8rem}
+
+/* Metric Cards */
+.metric-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.metric-val{font-size:1.8rem;font-weight:700;line-height:1.2}
+.metric-label{font-size:.7rem;color:var(--text3);margin-top:4px}
+.metric-change{font-size:.7rem;margin-top:6px;font-weight:500}
+.metric-up{color:var(--green)}
+.metric-down{color:var(--red)}
+
+/* Timeline */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}
+.timeline-item{position:relative;padding-bottom:16px}
+.timeline-item:last-child{padding-bottom:0}
+.timeline-dot{position:absolute;left:-20px;top:2px;width:12px;height:12px;border-radius:50%;border:2px solid var(--surface);z-index:1}
+.timeline-dot.dot-done{background:var(--green)}
+.timeline-dot.dot-doing{background:var(--orange)}
+.timeline-dot.dot-todo{background:var(--blue)}
+.timeline-dot.dot-overdue{background:var(--red)}
+.timeline-date{font-size:.65rem;color:var(--text3);margin-bottom:2px}
+.timeline-title{font-size:.8rem;font-weight:500;cursor:pointer}
+.timeline-title:hover{color:var(--blue)}
+.timeline-meta{font-size:.7rem;color:var(--text3);margin-top:2px}
+
 /* RESPONSIVE */
 @media(max-width:768px){
   .kanban{grid-template-columns:1fr}
@@ -254,8 +324,10 @@ input,select,textarea{font-family:var(--font);color:var(--text)}
   .search-box{min-width:unset;width:100%}
   .detail-modal{width:96%;max-width:none}
   .detail-info-grid{grid-template-columns:1fr}
+  .dash-row,.dash-row-3{grid-template-columns:1fr}
+  .metric-cards{grid-template-columns:1fr 1fr}
 }
-@media(max-width:480px){.app{padding:12px}.stats-bar{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.app{padding:12px}.stats-bar{grid-template-columns:1fr 1fr}.metric-cards{grid-template-columns:1fr 1fr}}
 
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
@@ -297,6 +369,7 @@ input,select,textarea{font-family:var(--font);color:var(--text)}
     <div class="view-toggle">
       <button class="view-btn active" data-view="kanban" onclick="setView('kanban')">Kanban</button>
       <button class="view-btn" data-view="list" onclick="setView('list')">Danh sách</button>
+      <button class="view-btn" data-view="dashboard" onclick="setView('dashboard')">Dashboard</button>
     </div>
   </div>
   <div class="add-task-bar">
@@ -446,7 +519,17 @@ function loadData(){
 }
 function refreshData(){setSyncing(true);google.script.run.withSuccessHandler(function(data){tasks=data.tasks||[];categories=data.settings.categories||[];renderFilters();renderUI();setSyncing(false);showToast('Đã làm mới','success')}).withFailureHandler(function(e){setSyncing(false);showToast('Lỗi: '+e.message,'error')}).getAllData()}
 function toggleTheme(){darkMode=!darkMode;document.body.classList.toggle('dark',darkMode);google.script.run.saveSettings({categories:categories,darkMode:darkMode})}
-function setView(v){currentView=v;document.querySelectorAll('.view-btn').forEach(function(b){b.classList.toggle('active',b.dataset.view===v)});renderUI()}
+function setView(v){
+  currentView=v;
+  document.querySelectorAll('.view-btn').forEach(function(b){b.classList.toggle('active',b.dataset.view===v)});
+  // Hide add-task & stats on dashboard (it has its own metrics)
+  var isDash=v==='dashboard';
+  document.querySelector('.add-task-bar').style.display=isDash?'none':'block';
+  document.getElementById('statsBar').style.display=isDash?'none':'grid';
+  document.getElementById('categoryFilters').style.display=isDash?'none':'flex';
+  document.getElementById('priorityFilters').style.display=isDash?'none':'flex';
+  renderUI();
+}
 
 // ============================================
 // FILTERS
@@ -806,7 +889,272 @@ function renderList(f){
   var s=f.slice().sort(function(a,b){var d=(so[a.status]||0)-(so[b.status]||0);return d!==0?d:(po[a.priority]||0)-(po[b.priority]||0)});
   var h='<div class="list-view">';for(var i=0;i<s.length;i++)h+=taskCardHTML(s[i]);return h+'</div>';
 }
-function renderUI(){var f=getFiltered();document.getElementById('mainContent').innerHTML=(currentView==='kanban')?renderKanban(f):renderList(f);renderStats()}
+function renderUI(){
+  var f=getFiltered();var main=document.getElementById('mainContent');
+  if(currentView==='dashboard'){main.innerHTML=renderDashboard();renderStats();return}
+  main.innerHTML=(currentView==='kanban')?renderKanban(f):renderList(f);renderStats();
+}
+
+// ============================================
+// DASHBOARD
+// ============================================
+function renderDashboard(){
+  var total=tasks.length;
+  var todo=tasks.filter(function(t){return t.status==='todo'}).length;
+  var doing=tasks.filter(function(t){return t.status==='doing'}).length;
+  var done=tasks.filter(function(t){return t.status==='done'}).length;
+  var overdue=tasks.filter(function(t){return isOverdue(t.deadline)&&t.status!=='done'});
+  var pct=total>0?Math.round(done/total*100):0;
+
+  // Checklist stats
+  var totalCl=0,doneCl=0;
+  tasks.forEach(function(t){if(t.checklist)t.checklist.forEach(function(c){totalCl++;if(c.done)doneCl++})});
+  var clPct=totalCl>0?Math.round(doneCl/totalCl*100):0;
+
+  var h='<div class="dashboard">';
+
+  // === METRIC CARDS ===
+  h+='<div class="metric-cards">';
+  h+='<div class="metric-card"><div class="metric-val">'+total+'</div><div class="metric-label">Tổng task</div></div>';
+  h+='<div class="metric-card"><div class="metric-val" style="color:var(--blue)">'+doing+'</div><div class="metric-label">Đang làm</div></div>';
+  h+='<div class="metric-card"><div class="metric-val" style="color:var(--green)">'+pct+'%</div><div class="metric-label">Hoàn thành</div></div>';
+  h+='<div class="metric-card"><div class="metric-val" style="color:var(--red)">'+overdue.length+'</div><div class="metric-label">Quá hạn</div></div>';
+  h+='</div>';
+
+  // === ROW 1: Donut + Bar Priority ===
+  h+='<div class="dash-row">';
+
+  // Donut chart - Status
+  h+='<div class="dash-card"><div class="dash-card-title"><span>&#9685;</span> Phân bổ trạng thái</div>';
+  h+=renderDonut([
+    {label:'Cần làm',value:todo,color:'var(--blue)'},
+    {label:'Đang làm',value:doing,color:'var(--orange)'},
+    {label:'Hoàn thành',value:done,color:'var(--green)'}
+  ],120);
+  h+='</div>';
+
+  // Bar chart - By Category
+  var catData=[];
+  categories.forEach(function(c){var cnt=tasks.filter(function(t){return t.category===c}).length;if(cnt>0)catData.push({label:c,value:cnt})});
+  h+='<div class="dash-card"><div class="dash-card-title"><span>&#9638;</span> Theo danh mục</div>';
+  h+=renderBarChart(catData,'var(--accent)');
+  h+='</div>';
+  h+='</div>';
+
+  // === ROW 2: Priority Donut + Weekly Line ===
+  h+='<div class="dash-row">';
+
+  // Donut - Priority
+  var high=tasks.filter(function(t){return t.priority==='high'&&t.status!=='done'}).length;
+  var med=tasks.filter(function(t){return t.priority==='medium'&&t.status!=='done'}).length;
+  var low=tasks.filter(function(t){return t.priority==='low'&&t.status!=='done'}).length;
+  h+='<div class="dash-card"><div class="dash-card-title"><span>&#9888;</span> Ưu tiên (chưa xong)</div>';
+  h+=renderDonut([
+    {label:'Cao',value:high,color:'var(--red)'},
+    {label:'Trung bình',value:med,color:'var(--orange)'},
+    {label:'Thấp',value:low,color:'var(--green)'}
+  ],120);
+  h+='</div>';
+
+  // Line chart - Tasks created/completed over last 7 days
+  h+='<div class="dash-card"><div class="dash-card-title"><span>&#128200;</span> Tiến độ 7 ngày qua</div>';
+  h+=renderLineChart();
+  h+='</div>';
+  h+='</div>';
+
+  // === ROW 3: Checklist progress + Upcoming ===
+  h+='<div class="dash-row">';
+
+  // Checklist overview
+  h+='<div class="dash-card"><div class="dash-card-title"><span>&#9745;</span> Tổng checklist</div>';
+  h+='<div style="display:flex;align-items:center;gap:16px">';
+  h+=renderDonut([
+    {label:'Đã xong',value:doneCl,color:'var(--green)'},
+    {label:'Chưa xong',value:totalCl-doneCl,color:'var(--border2)'}
+  ],90);
+  h+='</div></div>';
+
+  // Upcoming deadlines
+  var upcoming=tasks.filter(function(t){
+    if(!t.deadline||t.status==='done')return false;
+    var dl=new Date(t.deadline),now=new Date();now.setHours(0,0,0,0);
+    var diff=(dl-now)/(1000*60*60*24);
+    return diff>=0&&diff<=7;
+  }).sort(function(a,b){return new Date(a.deadline)-new Date(b.deadline)});
+
+  h+='<div class="dash-card"><div class="dash-card-title"><span>&#128197;</span> Sắp đến hạn (7 ngày)</div>';
+  if(upcoming.length===0){h+='<div class="dash-empty">Không có task nào sắp đến hạn</div>'}
+  else{
+    h+='<table class="dash-table"><thead><tr><th>Task</th><th>Deadline</th><th>Ưu tiên</th></tr></thead><tbody>';
+    upcoming.forEach(function(t){
+      var pc=t.priority==='high'?'badge-high':(t.priority==='medium'?'badge-medium':'badge-low');
+      var pl=t.priority==='high'?'Cao':(t.priority==='medium'?'TB':'Thấp');
+      h+='<tr><td class="td-title" onclick="openDetail(\''+t.id+'\')">'+eh(t.title)+'</td>';
+      h+='<td>'+formatDate(t.deadline)+'</td>';
+      h+='<td><span class="td-badge '+pc+'">'+pl+'</span></td></tr>';
+    });
+    h+='</tbody></table>';
+  }
+  h+='</div>';
+  h+='</div>';
+
+  // === OVERDUE TABLE ===
+  h+='<div class="dash-card"><div class="dash-card-title"><span style="color:var(--red)">&#9888;</span> Task quá hạn</div>';
+  if(overdue.length===0){h+='<div class="dash-empty">Không có task quá hạn</div>'}
+  else{
+    h+='<table class="dash-table"><thead><tr><th>Task</th><th>Deadline</th><th>Danh mục</th><th>Ưu tiên</th></tr></thead><tbody>';
+    overdue.sort(function(a,b){return new Date(a.deadline)-new Date(b.deadline)}).forEach(function(t){
+      var pc=t.priority==='high'?'badge-high':(t.priority==='medium'?'badge-medium':'badge-low');
+      var pl=t.priority==='high'?'Cao':(t.priority==='medium'?'TB':'Thấp');
+      var days=Math.ceil((new Date()-new Date(t.deadline))/(1000*60*60*24));
+      h+='<tr><td class="td-title" onclick="openDetail(\''+t.id+'\')">'+eh(t.title)+'</td>';
+      h+='<td class="td-overdue">'+formatDate(t.deadline)+' (-'+days+' ngày)</td>';
+      h+='<td>'+eh(t.category)+'</td>';
+      h+='<td><span class="td-badge '+pc+'">'+pl+'</span></td></tr>';
+    });
+    h+='</tbody></table>';
+  }
+  h+='</div>';
+
+  // === TIMELINE ===
+  h+='<div class="dash-card"><div class="dash-card-title"><span>&#128336;</span> Timeline gần đây</div>';
+  h+=renderTimeline();
+  h+='</div>';
+
+  h+='</div>';
+  return h;
+}
+
+// ============================================
+// CHART HELPERS
+// ============================================
+function renderDonut(data,size){
+  size=size||120;var r=size/2-8,cx=size/2,cy=size/2,total=0;
+  data.forEach(function(d){total+=d.value});
+  if(total===0)return'<div class="dash-empty">Chưa có dữ liệu</div>';
+
+  var h='<div class="donut-wrap"><svg class="donut-svg" width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">';
+  var circumference=2*Math.PI*r, offset=0;
+
+  data.forEach(function(d){
+    if(d.value===0)return;
+    var pct=d.value/total, dashLen=pct*circumference, dashGap=circumference-dashLen;
+    h+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+d.color+'" stroke-width="14" stroke-dasharray="'+dashLen+' '+dashGap+'" stroke-dashoffset="-'+offset+'" style="transform:rotate(-90deg);transform-origin:center"/>';
+    offset+=dashLen;
+  });
+
+  // Center text
+  h+='<text x="'+cx+'" y="'+cy+'" text-anchor="middle" dy=".1em" font-size="1.1rem" font-weight="700" fill="var(--text)">'+total+'</text>';
+  h+='<text x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-size=".55rem" fill="var(--text3)">tổng</text>';
+  h+='</svg>';
+
+  // Legend
+  h+='<div class="donut-legend">';
+  data.forEach(function(d){
+    var pct=total>0?Math.round(d.value/total*100):0;
+    h+='<div class="donut-legend-item"><span class="donut-legend-dot" style="background:'+d.color+'"></span>'+d.label+' ('+pct+'%)<span class="donut-legend-val">'+d.value+'</span></div>';
+  });
+  h+='</div></div>';
+  return h;
+}
+
+function renderBarChart(data,color){
+  if(!data.length)return'<div class="dash-empty">Chưa có dữ liệu</div>';
+  var max=Math.max.apply(null,data.map(function(d){return d.value}));
+  if(max===0)max=1;
+  var colors=['var(--blue)','var(--green)','var(--orange)','var(--red)','var(--accent)','#8b5cf6','#06b6d4','#ec4899'];
+
+  var h='<div class="bar-chart">';
+  data.forEach(function(d,i){
+    var pct=Math.round(d.value/max*100);
+    var c=colors[i%colors.length];
+    h+='<div class="bar-group"><div class="bar-val">'+d.value+'</div><div class="bar-fill" style="height:'+pct+'%;background:'+c+'"></div><div class="bar-label" title="'+ea(d.label)+'">'+eh(d.label)+'</div></div>';
+  });
+  h+='</div>';
+  return h;
+}
+
+function renderLineChart(){
+  var days=[],labels=[];
+  for(var i=6;i>=0;i--){
+    var d=new Date();d.setDate(d.getDate()-i);d.setHours(0,0,0,0);
+    days.push(d);
+    labels.push(d.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'}));
+  }
+
+  var created=[],completed=[];
+  days.forEach(function(day){
+    var nextDay=new Date(day);nextDay.setDate(nextDay.getDate()+1);
+    var cr=tasks.filter(function(t){if(!t.createdAt)return false;var c=new Date(t.createdAt);return c>=day&&c<nextDay}).length;
+    var co=tasks.filter(function(t){return t.status==='done'&&t.createdAt&&new Date(t.createdAt)<=nextDay}).length;
+    created.push(cr);completed.push(co);
+  });
+
+  var maxVal=Math.max.apply(null,created.concat(completed).concat([1]));
+  var w=100,h2=100,padL=8,padR=4,padT=8,padB=20;
+  var plotW=w-padL-padR,plotH=h2-padT-padB;
+
+  var svg='<div class="line-chart-wrap"><svg class="line-chart-svg" viewBox="0 0 '+w+' '+h2+'">';
+
+  // Grid lines
+  for(var g=0;g<=4;g++){
+    var gy=padT+plotH-plotH*(g/4);
+    svg+='<line x1="'+padL+'" y1="'+gy+'" x2="'+(w-padR)+'" y2="'+gy+'" class="line-chart-grid"/>';
+  }
+
+  // Created line
+  var pts1=[],pts2=[];
+  for(var k=0;k<7;k++){
+    var x=padL+k*(plotW/6);
+    var y1=padT+plotH-plotH*(created[k]/maxVal);
+    var y2=padT+plotH-plotH*(completed[k]/maxVal);
+    pts1.push(x+','+y1);
+    pts2.push(x+','+y2);
+    // X labels
+    svg+='<text x="'+x+'" y="'+(h2-2)+'" text-anchor="middle" class="line-chart-label">'+labels[k]+'</text>';
+  }
+
+  // Area fills
+  var area1=padL+','+(padT+plotH)+' '+pts1.join(' ')+' '+(padL+plotW)+','+(padT+plotH);
+  svg+='<polygon points="'+area1+'" fill="var(--blue)" class="line-chart-area"/>';
+
+  // Lines
+  svg+='<polyline points="'+pts1.join(' ')+'" class="line-chart-path" stroke="var(--blue)"/>';
+
+  // Dots
+  for(var d1=0;d1<7;d1++){
+    var p=pts1[d1].split(',');
+    svg+='<circle cx="'+p[0]+'" cy="'+p[1]+'" class="line-chart-dot" fill="var(--blue)"><title>Tạo mới: '+created[d1]+'</title></circle>';
+  }
+
+  svg+='</svg>';
+  svg+='<div style="display:flex;gap:16px;justify-content:center;margin-top:8px">';
+  svg+='<div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--blue)"></span><span style="font-size:.75rem">Task tạo mới</span></div>';
+  svg+='</div></div>';
+  return svg;
+}
+
+function renderTimeline(){
+  // Get recent tasks sorted by createdAt desc
+  var recent=tasks.slice().filter(function(t){return t.createdAt}).sort(function(a,b){return new Date(b.createdAt)-new Date(a.createdAt)}).slice(0,10);
+  if(!recent.length)return'<div class="dash-empty">Chưa có hoạt động</div>';
+
+  var h='<div class="timeline">';
+  recent.forEach(function(t){
+    var dotClass=t.status==='done'?'dot-done':(t.status==='doing'?'dot-doing':'dot-todo');
+    if(isOverdue(t.deadline)&&t.status!=='done')dotClass='dot-overdue';
+    var sLabel={todo:'Cần làm',doing:'Đang làm',done:'Hoàn thành'}[t.status];
+    var date=t.createdAt?new Date(t.createdAt).toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    h+='<div class="timeline-item">';
+    h+='<div class="timeline-dot '+dotClass+'"></div>';
+    h+='<div class="timeline-date">'+date+'</div>';
+    h+='<div class="timeline-title" onclick="openDetail(\''+t.id+'\')">'+eh(t.title)+'</div>';
+    h+='<div class="timeline-meta">'+eh(t.category)+' &middot; '+sLabel+'</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+  return h;
+}
 
 // ============================================
 // KEYBOARD
